@@ -10,23 +10,31 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+// Person object holds the name and id of a random person
 type Person struct {
 	Name string `json:"name"`
-	id   int    `json:"id"`
+	ID   int    `json:"id"`
 }
 
-func getJsonHandler(ctx context.Context, r events.APIGatewayProxyRequest) (error, events.APIGatewayProxyResponse) {
+func handler(ctx context.Context, r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	id := rand.Int()
 	name := "Stupid Rafee"
-	p := Person{Name: name, id: id}
+	p := Person{Name: name, ID: id}
 	b, err := json.Marshal(p)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
+
 	resp := events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(b),
 	}
-	return err, resp
+	return resp, err
 }
 
 func main() {
-	lambda.Start(getJsonHandler)
+	lambda.Start(handler)
 }
